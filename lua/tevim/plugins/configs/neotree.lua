@@ -30,7 +30,10 @@ return {
 			},
 		},
 	},
-	window = { width = 30 },
+	window = { 
+		width = 30,
+		auto_expand_width = true
+	},
 	filesystem = {
 		filtered_items = { hide_dotfiles = false, hide_gitignored = false },
 		follow_current_file = { enabled = true },

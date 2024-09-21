@@ -29,6 +29,7 @@ if is_available("neo-tree.nvim") then
 		end,
 		desc = "Open Neo-Tree on startup with directory",
 	})
+	
 	autocmd("TermClose", {
 		pattern = "*lazygit*",
 		group = augroup("neotree_refresh", { clear = true }),

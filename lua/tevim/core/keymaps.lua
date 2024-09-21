@@ -129,3 +129,8 @@ map({ "n", "v" }, "<Leader><Leader>u", "<cmd>TeVimUpdate<CR>", opts, { desc = "U
 map({ "n", "v" }, "<Leader><Leader>m", "<cmd>TeVimCheckMason<CR>", opts, { desc = "Check Mason" })
 map({ "n", "v" }, "<Leader><Leader>t", "<cmd>TeVimToggleTrans<CR>", opts, { desc = "Toggle Transparency" })
 map({ "n", "v" }, "<Leader><Leader>c", "<cmd>TeVimThemes<CR>", opts, { desc = "TeVim Themes" })
+-- Indent selected lines with Tab
+map("v", "<Tab>", ">gv", opts, { desc = "Indent right (Tab)" })
+
+-- Unindent selected lines with Shift+Tab
+map("v", "<S-Tab>", "<gv", opts, { desc = "Indent left (Shift+Tab)" })
