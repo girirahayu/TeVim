@@ -134,3 +134,5 @@ map("v", "<Tab>", ">gv", opts, { desc = "Indent right (Tab)" })
 
 -- Unindent selected lines with Shift+Tab
 map("v", "<S-Tab>", "<gv", opts, { desc = "Indent left (Shift+Tab)" })
+-- Map command + click (or Ctrl + LeftMouse) to jump to definition
+map("n", "<C-LeftMouse>", "<cmd>lua vim.lsp.buf.definition()<CR>", opts, { desc = "Go to Definition" })

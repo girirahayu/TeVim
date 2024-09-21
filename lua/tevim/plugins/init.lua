@@ -6,6 +6,9 @@ local plugins = {
 		"MunifTanjim/nui.nvim",
 	},
 	{
+		"sheerun/vim-polyglot",
+	},
+	{
 		"nvim-tree/nvim-web-devicons",
 		event = "BufRead",
 		opts = function()

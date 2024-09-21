@@ -48,6 +48,14 @@ if is_available("neo-tree.nvim") then
 	})
 end
 
+-- Add filetype mapping for Jenkinsfile
+vim.filetype.add({
+    extension = {
+        jenkinsfile = "groovy",
+    }
+})
+
+
 autocmd("CursorHold", {
 	pattern = "*",
 	callback = function()
