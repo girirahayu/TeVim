@@ -16,6 +16,105 @@ local plugins = {
 			return require("tevim.plugins.configs.devicons")
 		end,
 	},
+    {
+        "CopilotC-Nvim/CopilotChat.nvim",
+        branch = "canary",
+        dependencies = {
+            { "github/copilot.vim" },
+            { "nvim-lua/plenary.nvim" },
+            { "nvim-telescope/telescope.nvim" },
+        },
+        opts = {
+            debug = true, -- Enable debugging
+            show_help = true, -- Show help actions
+            window = {
+                layout = "float",
+            },
+            auto_follow_cursor = false, -- Don't follow the cursor after getting a response
+        },
+		config = function(_, opts)
+			local chat = require("CopilotChat")
+			local select = require("CopilotChat.select")
+
+			-- Initialize the selection option
+			opts.selection = select.unnamed
+
+			-- Ensure prompts is a table before assigning values
+			opts.prompts = opts.prompts or {}
+
+			opts.prompts.Commit = {
+				prompt = "Write a commit message according to the convention:",
+				selection = select.gitdiff,
+			}
+			opts.prompts.CommitStaged = {
+				prompt = "Write a commit message for staged changes:",
+				selection = function(source)
+					return select.gitdiff(source, true)
+				end,
+			}
+
+			-- Setup the chat with the provided options
+			chat.setup(opts)
+
+			-- Define user commands for CopilotChat
+			vim.api.nvim_create_user_command("CopilotChatVisual", function(args)
+				chat.ask(args.args, { selection = select.visual })
+			end, { nargs = "*", range = true })
+
+			vim.api.nvim_create_user_command("CopilotChatInline", function(args)
+				chat.ask(args.args, {
+					selection = select.visual,
+					window = {
+						layout = "float",
+						relative = "cursor",
+						width = 1,
+						height = 0.4,
+						row = 1,
+					},
+				})
+			end, { nargs = "*", range = true })
+
+			vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
+				chat.ask(args.args, { selection = select.buffer })
+			end, { nargs = "*", range = true })
+		end,
+        event = "VeryLazy",
+        keys = {
+            { "<leader>cch", function()
+                local actions = require("CopilotChat.actions")
+                require("CopilotChat.integrations.telescope").pick(actions.help_actions())
+            end, desc = "CopilotChat - Help actions" },
+            { "<leader>ccp", function()
+                local actions = require("CopilotChat.actions")
+                require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
+            end, desc = "CopilotChat - Prompt actions" },
+            { "<leader>cce", "<cmd>CopilotChatExplain<cr>", desc = "CopilotChat - Explain code" },
+            { "<leader>cct", "<cmd>CopilotChatTests<cr>", desc = "CopilotChat - Generate tests" },
+            { "<leader>ccr", "<cmd>CopilotChatReview<cr>", desc = "CopilotChat - Review code" },
+            { "<leader>ccR", "<cmd>CopilotChatRefactor<cr>", desc = "CopilotChat - Refactor code" },
+            { "<leader>ccn", "<cmd>CopilotChatBetterNamings<cr>", desc = "CopilotChat - Better Naming" },
+            { "<leader>ccv", ":CopilotChatVisual", mode = "x", desc = "CopilotChat - Open in vertical split" },
+            { "<leader>ccx", ":CopilotChatInline<cr>", mode = "x", desc = "CopilotChat - Inline chat" },
+            { "<leader>cci", function()
+                local input = vim.fn.input("Ask Copilot: ")
+                if input ~= "" then
+                    vim.cmd("CopilotChat " .. input)
+                end
+            end, desc = "CopilotChat - Ask input" },
+            { "<leader>ccm", "<cmd>CopilotChatCommit<cr>", desc = "CopilotChat - Generate commit message for all changes" },
+            { "<leader>ccM", "<cmd>CopilotChatCommitStaged<cr>", desc = "CopilotChat - Generate commit message for staged changes" },
+            { "<leader>ccq", function()
+                local input = vim.fn.input("Quick Chat: ")
+                if input ~= "" then
+                    vim.cmd("CopilotChatBuffer " .. input)
+                end
+            end, desc = "CopilotChat - Quick chat" },
+            { "<leader>ccd", "<cmd>CopilotChatDebugInfo<cr>", desc = "CopilotChat - Debug Info" },
+            { "<leader>ccf", "<cmd>CopilotChatFixDiagnostic<cr>", desc = "CopilotChat - Fix Diagnostic" },
+            { "<leader>ccl", "<cmd>CopilotChatReset<cr>", desc = "CopilotChat - Clear buffer and chat history" },
+            { "<leader>ccv", "<cmd>CopilotChatToggle<cr>", desc = "CopilotChat - Toggle Vsplit" },
+        },
+    },
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		cmd = "Neotree",
