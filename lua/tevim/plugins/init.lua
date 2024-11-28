@@ -5,9 +5,37 @@ local plugins = {
 	{
 		"MunifTanjim/nui.nvim",
 	},
+
 	{
-		"sheerun/vim-polyglot",
+	  'sheerun/vim-polyglot',
+	  config = function()
+		-- Custom settings for vim-polyglot (optional)
+		vim.g.polyglot_disabled = {}  -- Disable specific language packs if you don't need them
+	  end
 	},
+	{
+		"sbdchd/neoformat", -- Plugin name
+		config = function()
+		  -- Basic Setup: Auto-format on save for supported files
+		  vim.cmd([[
+			augroup fmt
+			  autocmd!
+			  autocmd BufWritePre * undojoin | Neoformat
+			augroup END
+		  ]])
+
+		  -- Optional: Enable specific formatters for certain languages
+		  vim.g.neoformat_enabled_python = {'black'} -- Use 'black' for Python
+		  vim.g.neoformat_enabled_javascript = {'prettier'} -- Use 'prettier' for JavaScript
+		  vim.g.neoformat_enabled_lua = {'stylua'} -- Use 'stylua' for Lua
+
+		  -- Optional: Enable verbose mode to show messages
+		  vim.g.neoformat_verbose = 1
+
+		  -- Optional: Run all formatters for a language
+		  vim.g.neoformat_run_all_formatters = 1
+		end,
+	  },
 	{
 		"nvim-tree/nvim-web-devicons",
 		event = "BufRead",
@@ -33,42 +61,47 @@ local plugins = {
 			{ "nvim-telescope/telescope.nvim" },
 		},
 		opts = {
-			debug = true, -- Enable debugging
-			show_help = true, -- Show help actions
+			debug = true,
+			show_help = true,
 			window = {
 				layout = "float",
 			},
-			auto_follow_cursor = false, -- Don't follow the cursor after getting a response
+			auto_follow_cursor = false,
 		},
 		config = function(_, opts)
 			local chat = require("CopilotChat")
 			local select = require("CopilotChat.select")
-
+	
 			-- Initialize the selection option
 			opts.selection = select.unnamed
-
+	
 			-- Ensure prompts is a table before assigning values
 			opts.prompts = opts.prompts or {}
-
-			opts.prompts.Commit = {
-				prompt = "Write a commit message according to the convention:",
-				selection = select.gitdiff,
-			}
-			opts.prompts.CommitStaged = {
-				prompt = "Write a commit message for staged changes:",
-				selection = function(source)
-					return select.gitdiff(source, true)
-				end,
-			}
-
+	
+			-- Check if `select.gitdiff` exists before using it
+			if select.gitdiff then
+				opts.prompts.Commit = {
+					prompt = "Write a commit message according to the convention:",
+					selection = select.gitdiff,
+				}
+				opts.prompts.CommitStaged = {
+					prompt = "Write a commit message for staged changes:",
+					selection = function(source)
+						return select.gitdiff(source, true) -- Check `select.gitdiff` is valid
+					end,
+				}
+			else
+				vim.notify("Warning: `select.gitdiff` is not defined. Please check plugin updates.", vim.log.levels.WARN)
+			end
+	
 			-- Setup the chat with the provided options
 			chat.setup(opts)
-
+	
 			-- Define user commands for CopilotChat
 			vim.api.nvim_create_user_command("CopilotChatVisual", function(args)
 				chat.ask(args.args, { selection = select.visual })
 			end, { nargs = "*", range = true })
-
+	
 			vim.api.nvim_create_user_command("CopilotChatInline", function(args)
 				chat.ask(args.args, {
 					selection = select.visual,
@@ -81,10 +114,21 @@ local plugins = {
 					},
 				})
 			end, { nargs = "*", range = true })
-
+	
 			vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
 				chat.ask(args.args, { selection = select.buffer })
 			end, { nargs = "*", range = true })
+	
+			-- Handle removed commands
+			vim.api.nvim_create_user_command('CopilotChatFixDiagnostic', function()
+				utils.deprecate('CopilotChatFixDiagnostic', 'CopilotChatFix')
+				M.ask('/Fix')
+			end, { force = true })
+			
+			vim.api.nvim_create_user_command('CopilotChatCommitStaged', function()
+				utils.deprecate('CopilotChatCommitStaged', 'CopilotChatCommit')
+				M.ask('/Commit')
+			end, { force = true })
 		end,
 		event = "VeryLazy",
 		keys = {
@@ -110,7 +154,7 @@ local plugins = {
 				end
 			end, desc = "CopilotChat - Ask input" },
 			{ "<leader>ccm", "<cmd>CopilotChatCommit<cr>", desc = "CopilotChat - Generate commit message for all changes" },
-			{ "<leader>ccM", "<cmd>CopilotChatCommitStaged<cr>", desc = "CopilotChat - Generate commit message for staged changes" },
+			{ "<leader>ccM", "<cmd>CopilotChatCommit<cr>", desc = "CopilotChat - Generate commit message for staged changes" },
 			{ "<leader>ccq", function()
 				local input = vim.fn.input("Quick Chat: ")
 				if input ~= "" then
@@ -118,11 +162,11 @@ local plugins = {
 				end
 			end, desc = "CopilotChat - Quick chat" },
 			{ "<leader>ccd", "<cmd>CopilotChatDebugInfo<cr>", desc = "CopilotChat - Debug Info" },
-			{ "<leader>ccf", "<cmd>CopilotChatFixDiagnostic<cr>", desc = "CopilotChat - Fix Diagnostic" },
+			{ "<leader>ccf", "<cmd>CopilotChatFix<cr>", desc = "CopilotChat - Fix Diagnostic" },
 			{ "<leader>ccl", "<cmd>CopilotChatReset<cr>", desc = "CopilotChat - Clear buffer and chat history" },
 			{ "<leader>ccv", "<cmd>CopilotChatToggle<cr>", desc = "CopilotChat - Toggle Vsplit" },
 		},
-	},	
+	},
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		cmd = "Neotree",
@@ -174,6 +218,7 @@ local plugins = {
 				opts = { symbol = "│" },
 			},
 		},
+
 		opts = function()
 			return require("tevim.plugins.configs.blankline")
 		end,
@@ -436,3 +481,4 @@ require("lazy").setup(plugins, {
 		},
 	},
 })
+
