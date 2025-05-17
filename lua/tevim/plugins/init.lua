@@ -139,7 +139,7 @@ local plugins = {
 				})
 			end, { nargs = "*", range = true })
 
-			vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
+			vim.api.nvim_create_user_command("CopilotChatBuffer", function(airgs)
 				chat.ask(args.args, { selection = select.buffer })
 			end, { nargs = "*", range = true })
 
@@ -150,6 +150,8 @@ local plugins = {
 			keymap("n", "<leader>cr", "<cmd>CopilotChatReview<cr>", { desc = "Review code" })
 			keymap("n", "<leader>cR", "<cmd>CopilotChatRefactor<cr>", { desc = "Refactor code" })
 			keymap("n", "<leader>cf", "<cmd>CopilotChatFix<cr>", { desc = "Fix code" })
+			keymap("n", "<leader>cg", "<cmd>CopilotChatReset<cr>", { desc = "Reset chat" })
+			keymap("n", "<leader>cm", "<cmd>CopilotChatModels<cr>", { desc = "Chat Model" })
 			keymap("n", "<leader>cq", function()
 				local input = vim.fn.input("Quick Chat: ")
 				if input ~= "" then
@@ -166,8 +168,120 @@ local plugins = {
 		end,
 		event = "VeryLazy",
 	},
+	{
+	  "jackMort/ChatGPT.nvim",
+	  event = "VeryLazy",
+	  config = function()
+		require("chatgpt").setup({
+		  -- Assumes you have OPENAI_API_KEY set in your environment
+		  api_key_cmd = nil, -- use env var
+		  yank_register = "+",
+		  edit_with_instructions = {
+			diff = true,
+			keymaps = {
+			  use_output = "<C-y>",
+			  use_output_replace = "<C-r>",
+			  toggle_diff = "<C-d>",
+			  toggle_settings = "<C-o>",
+			  cycle_windows = "<Tab>",
+			  select_session = "<Space>",
+			  toggle_help = "<F1>",
+			},
+		  },
+		  chat = {
+			welcome_message = WELCOME_MESSAGE,
+			loading_text = "Loading, please wait ...",
+			question_sign = "", -- 🙂
+			answer_sign = "ﮧ", -- 🤖
+			max_line_length = 120,
+			sessions_window = {
+			  border = {
+				style = "rounded",
+				text = {
+				  top = " Sessions ",
+				},
+			  },
+			  win_options = {
+				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+			  },
+			},
+			-- POPUP LOCATION: right side
+			window = {
+			  layout = {
+				position = "right", -- <--- THIS SETS THE POPUP TO THE RIGHT
+				width = 0.4,        -- 40% of the screen width
+				height = 0.95,
+			  },
+			  border = {
+				style = "rounded",
+				text = {
+				  top = " ChatGPT ",
+				},
+			  },
+			  win_options = {
+				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+			  },
+			},
+		  },
+		  popup_input = {
+			prompt = "  ",
+			border = {
+			  highlight = "FloatBorder",
+			  style = "rounded",
+			  text = {
+				top_align = "center",
+				top = " Prompt ",
+			  },
+			},
+			win_options = {
+			  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+			},
+			submit = "<C-Enter>",
+			submit_n = "<Enter>",
+		  },
+		  openai_params = {
+			model = "gpt-4-1106-preview", -- or your preferred model
+			frequency_penalty = 0,
+			presence_penalty = 0,
+			max_tokens = 4095,
+			temperature = 0.2,
+			top_p = 0.1,
+			n = 1,
+		  },
+		  openai_edit_params = {
+			model = "gpt-3.5-turbo",
+			temperature = 0,
+			top_p = 1,
+			n = 1,
+		  },
+		  actions_paths = {}, -- can add custom actions here
+		  show_quickfixes_cmd = "Trouble quickfix",
+		  predefined_chat_gpt_prompts = "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
+		})
 
-	-- File explorer
+		-- Keymaps for all features
+		vim.keymap.set("n", "<leader>cGt", ":ChatGPT<CR>", { desc = "Open ChatGPT" })
+		vim.keymap.set("n", "<leader>cGe", ":ChatGPTEditWithInstructions<CR>", { desc = "Edit with ChatGPT" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGg", ":ChatGPTRun grammar_correction<CR>", { desc = "Grammar Correction" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGt", ":ChatGPTRun translate<CR>", { desc = "Translate" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGk", ":ChatGPTRun keywords<CR>", { desc = "Keywords" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGd", ":ChatGPTRun docstring<CR>", { desc = "Docstring" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGa", ":ChatGPTRun add_tests<CR>", { desc = "Add Tests" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGo", ":ChatGPTRun optimize_code<CR>", { desc = "Optimize Code" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGs", ":ChatGPTRun summarize<CR>", { desc = "Summarize" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGf", ":ChatGPTRun fix_bugs<CR>", { desc = "Fix Bugs" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGx", ":ChatGPTRun explain_code<CR>", { desc = "Explain Code" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGr", ":ChatGPTRun roxygen_edit<CR>", { desc = "Roxygen Edit" })
+		vim.keymap.set({ "n", "v" }, "<leader>cGl", ":ChatGPTRun code_readability_analysis<CR>", { desc = "Code Readability Analysis" })
+	  end,
+	  dependencies = {
+		"MunifTanjim/nui.nvim",
+		"nvim-lua/plenary.nvim",
+		"folke/trouble.nvim", -- optional
+		"nvim-telescope/telescope.nvim"
+	  }
+	},
+		-- File explorer
 	{
 		"nvim-neo-tree/neo-tree.nvim",
 		cmd = "Neotree",
