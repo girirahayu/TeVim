@@ -3,6 +3,14 @@ vim.g.loaded_ruby_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_node_provider = 0
 
+local sysname = vim.loop.os_uname().sysname
+local comment_key = "<C-_>" -- Default for Linux
+
+if sysname == "Darwin" then
+  comment_key = "<C-/>" -- For macOS
+end
+
+
 local plugins = {
 	-- Utility libraries
 	{ "nvim-lua/plenary.nvim" },
@@ -175,7 +183,7 @@ local plugins = {
 		require("chatgpt").setup({
 		  -- Assumes you have OPENAI_API_KEY set in your environment
 		  api_key_cmd = nil, -- use env var
-		  yank_register = "+",
+yank_register = "+",
 		  edit_with_instructions = {
 			diff = true,
 			keymaps = {
@@ -346,18 +354,17 @@ local plugins = {
 	{
 		"numToStr/Comment.nvim",
 		keys = {
-			{ mode = "n", "<C-/>", "<Plug>(comment_toggle_linewise_current)",      desc = "Toggle Comment" },
-			{ mode = "i", "<C-/>", "<esc><Plug>(comment_toggle_linewise_current)", desc = "Toggle Comment(Insert)" },
-			{ mode = "v", "<C-/>", "<Plug>(comment_toggle_linewise_visual)",       desc = "Toggle Comment(Visual)" },
+			{ mode = "n", comment_key, "<Plug>(comment_toggle_linewise_current)",      desc = "Toggle Comment" },
+			{ mode = "i", comment_key, "<esc><Plug>(comment_toggle_linewise_current)", desc = "Toggle Comment(Insert)" },
+			{ mode = "v", comment_key, "<Plug>(comment_toggle_linewise_visual)",       desc = "Toggle Comment(Visual)" },
 		},
 		dependencies = "JoosepAlviste/nvim-ts-context-commentstring",
 		config = function()
 			require("Comment").setup({
-				pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
-			})
+			pre_hook = require("ts_context_commentstring.integrations.comment_nvim").create_pre_hook(),
+		})
 		end,
 	},
-
 	-- Dressing (UI select/input)
 	{
 		"stevearc/dressing.nvim",
