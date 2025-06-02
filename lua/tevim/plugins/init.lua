@@ -24,6 +24,58 @@ local plugins = {
 		end,
 	},
 	{
+	  "MeanderingProgrammer/render-markdown.nvim",
+	  ft = { "markdown" },
+	  dependencies = { "nvim-treesitter/nvim-treesitter" },
+	  config = function()
+		require("render-markdown").setup({
+		  theme = "dark", -- or "light", depending on your preference
+		  render_code_block = true,
+		  render_math = true,
+		  render_yaml = true,
+		  render_frontmatter = true,
+		  render_links = true,
+		  render_inline_links = true,
+		  render_bold = true,
+		  render_italic = true,
+		  render_strikethrough = true,
+		  render_underline = true,
+		  render_task = true,
+		  render_list = true,
+		  render_quote = true,
+		  render_table = true,
+		  render_heading = true,
+		  render_horizontal_rule = true,
+		  render_image = true,
+		  render_superscript = true,
+		  render_subscript = true,
+		  render_mark = true,
+		  render_highlight = true,
+		  render_footnote = true,
+		  render_definition = true,
+		  render_abbreviation = true,
+		  render_toc = true,
+		  render_math_block = true,
+		  render_math_inline = true,
+		  render_checkbox = true,
+		  render_html = true,
+		  render_escape = true,
+		  render_entity = true,
+		  render_autolink = true,
+		  render_task_checkbox = true,
+		  render_task_done = true,
+		  render_task_todo = true,
+		  render_task_in_progress = true,
+		  render_task_cancelled = true,
+		  render_task_on_hold = true,
+		  render_task_custom = true,
+		  -- You can add more options as needed, see plugin docs for all options
+		})
+		-- Shortcut: <leader>mr to toggle Markdown rendering
+		vim.keymap.set("n", "<leader>mr", "<cmd>RenderMarkdownToggle<CR>", { desc = "Toggle Markdown Render" })
+	  end,
+	},
+	{
 		"sbdchd/neoformat",
 		config = function()
 			vim.cmd([[
