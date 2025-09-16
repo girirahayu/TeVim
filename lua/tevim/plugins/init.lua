@@ -24,56 +24,36 @@ local plugins = {
 		end,
 	},
 	{
-	  "MeanderingProgrammer/render-markdown.nvim",
-	  ft = { "markdown" },
-	  dependencies = { "nvim-treesitter/nvim-treesitter" },
-	  config = function()
-		require("render-markdown").setup({
-		  theme = "dark", -- or "light", depending on your preference
-		  render_code_block = true,
-		  render_math = true,
-		  render_yaml = true,
-		  render_frontmatter = true,
-		  render_links = true,
-		  render_inline_links = true,
-		  render_bold = true,
-		  render_italic = true,
-		  render_strikethrough = true,
-		  render_underline = true,
-		  render_task = true,
-		  render_list = true,
-		  render_quote = true,
-		  render_table = true,
-		  render_heading = true,
-		  render_horizontal_rule = true,
-		  render_image = true,
-		  render_superscript = true,
-		  render_subscript = true,
-		  render_mark = true,
-		  render_highlight = true,
-		  render_footnote = true,
-		  render_definition = true,
-		  render_abbreviation = true,
-		  render_toc = true,
-		  render_math_block = true,
-		  render_math_inline = true,
-		  render_checkbox = true,
-		  render_html = true,
-		  render_escape = true,
-		  render_entity = true,
-		  render_autolink = true,
-		  render_task_checkbox = true,
-		  render_task_done = true,
-		  render_task_todo = true,
-		  render_task_in_progress = true,
-		  render_task_cancelled = true,
-		  render_task_on_hold = true,
-		  render_task_custom = true,
-		  -- You can add more options as needed, see plugin docs for all options
-		})
-		-- Shortcut: <leader>mr to toggle Markdown rendering
-		vim.keymap.set("n", "<leader>mr", "<cmd>RenderMarkdownToggle<CR>", { desc = "Toggle Markdown Render" })
-	  end,
+		'MeanderingProgrammer/render-markdown.nvim',
+		cmd = { 'RenderMarkdown' },
+		dependencies = {
+			'nvim-treesitter/nvim-treesitter',
+			'nvim-tree/nvim-web-devicons', -- or your preferred icon provider
+		},
+		opts = {},
+		config = function()
+			require('render-markdown').setup({
+				completions = { blink = { enabled = true } },
+				completions = { lsp = { enabled = true } }
+			})
+			-- Keymaps for all features
+			local keymap = vim.keymap.set
+			-- Enable/Disable/Toggle globally
+			keymap("n", "<leader>rme", "<cmd>RenderMarkdown enable<cr>",   { desc = "Enable RenderMarkdown" })
+			keymap("n", "<leader>rmd", "<cmd>RenderMarkdown disable<cr>",  { desc = "Disable RenderMarkdown" })
+			keymap("n", "<leader>rmt", "<cmd>RenderMarkdown toggle<cr>",   { desc = "Toggle RenderMarkdown" })
+			-- Buffer-local enable/disable/toggle
+			keymap("n", "<leader>rmb",  "<cmd>RenderMarkdown buf_enable<cr>",   { desc = "Enable RenderMarkdown (Buffer)" })
+			keymap("n", "<leader>rmbd", "<cmd>RenderMarkdown buf_disable<cr>",  { desc = "Disable RenderMarkdown (Buffer)" })
+			keymap("n", "<leader>rmbt", "<cmd>RenderMarkdown buf_toggle<cr>",   { desc = "Toggle RenderMarkdown (Buffer)" })
+			-- Utility commands
+			keymap("n", "<leader>rml", "<cmd>RenderMarkdown log<cr>",      { desc = "RenderMarkdown Log" })
+			keymap("n", "<leader>rmx", "<cmd>RenderMarkdown expand<cr>",   { desc = "Expand anti-conceal margin" })
+			keymap("n", "<leader>rmc", "<cmd>RenderMarkdown contract<cr>", { desc = "Contract anti-conceal margin" })
+			keymap("n", "<leader>rmD", "<cmd>RenderMarkdown debug<cr>",    { desc = "RenderMarkdown Debug" })
+			keymap("n", "<leader>rmC", "<cmd>RenderMarkdown config<cr>",   { desc = "RenderMarkdown Config Diff" })
+		end,
+		event = "VeryLazy",
 	},
 	{
 		"sbdchd/neoformat",
@@ -199,7 +179,7 @@ local plugins = {
 				})
 			end, { nargs = "*", range = true })
 
-			vim.api.nvim_create_user_command("CopilotChatBuffer", function(airgs)
+			vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
 				chat.ask(args.args, { selection = select.buffer })
 			end, { nargs = "*", range = true })
 
@@ -228,119 +208,119 @@ local plugins = {
 		end,
 		event = "VeryLazy",
 	},
-	{
-	  "jackMort/ChatGPT.nvim",
-	  event = "VeryLazy",
-	  config = function()
-		require("chatgpt").setup({
-		  -- Assumes you have OPENAI_API_KEY set in your environment
-		  api_key_cmd = nil, -- use env var
-yank_register = "+",
-		  edit_with_instructions = {
-			diff = true,
-			keymaps = {
-			  use_output = "<C-y>",
-			  use_output_replace = "<C-r>",
-			  toggle_diff = "<C-d>",
-			  toggle_settings = "<C-o>",
-			  cycle_windows = "<Tab>",
-			  select_session = "<Space>",
-			  toggle_help = "<F1>",
-			},
-		  },
-		  chat = {
-			welcome_message = WELCOME_MESSAGE,
-			loading_text = "Loading, please wait ...",
-			question_sign = "", -- 🙂
-			answer_sign = "ﮧ", -- 🤖
-			max_line_length = 120,
-			sessions_window = {
-			  border = {
-				style = "rounded",
-				text = {
-				  top = " Sessions ",
-				},
-			  },
-			  win_options = {
-				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-			  },
-			},
-			-- POPUP LOCATION: right side
-			window = {
-			  layout = {
-				position = "right", -- <--- THIS SETS THE POPUP TO THE RIGHT
-				width = 0.4,        -- 40% of the screen width
-				height = 0.95,
-			  },
-			  border = {
-				style = "rounded",
-				text = {
-				  top = " ChatGPT ",
-				},
-			  },
-			  win_options = {
-				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-			  },
-			},
-		  },
-		  popup_input = {
-			prompt = "  ",
-			border = {
-			  highlight = "FloatBorder",
-			  style = "rounded",
-			  text = {
-				top_align = "center",
-				top = " Prompt ",
-			  },
-			},
-			win_options = {
-			  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
-			},
-			submit = "<C-Enter>",
-			submit_n = "<Enter>",
-		  },
-		  openai_params = {
-			model = "gpt-4-1106-preview", -- or your preferred model
-			frequency_penalty = 0,
-			presence_penalty = 0,
-			max_tokens = 4095,
-			temperature = 0.2,
-			top_p = 0.1,
-			n = 1,
-		  },
-		  openai_edit_params = {
-			model = "gpt-3.5-turbo",
-			temperature = 0,
-			top_p = 1,
-			n = 1,
-		  },
-		  actions_paths = {}, -- can add custom actions here
-		  show_quickfixes_cmd = "Trouble quickfix",
-		  predefined_chat_gpt_prompts = "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
-		})
-
-		-- Keymaps for all features
-		vim.keymap.set("n", "<leader>cGt", ":ChatGPT<CR>", { desc = "Open ChatGPT" })
-		vim.keymap.set("n", "<leader>cGe", ":ChatGPTEditWithInstructions<CR>", { desc = "Edit with ChatGPT" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGg", ":ChatGPTRun grammar_correction<CR>", { desc = "Grammar Correction" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGt", ":ChatGPTRun translate<CR>", { desc = "Translate" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGk", ":ChatGPTRun keywords<CR>", { desc = "Keywords" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGd", ":ChatGPTRun docstring<CR>", { desc = "Docstring" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGa", ":ChatGPTRun add_tests<CR>", { desc = "Add Tests" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGo", ":ChatGPTRun optimize_code<CR>", { desc = "Optimize Code" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGs", ":ChatGPTRun summarize<CR>", { desc = "Summarize" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGf", ":ChatGPTRun fix_bugs<CR>", { desc = "Fix Bugs" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGx", ":ChatGPTRun explain_code<CR>", { desc = "Explain Code" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGr", ":ChatGPTRun roxygen_edit<CR>", { desc = "Roxygen Edit" })
-		vim.keymap.set({ "n", "v" }, "<leader>cGl", ":ChatGPTRun code_readability_analysis<CR>", { desc = "Code Readability Analysis" })
-	  end,
-	  dependencies = {
-		"MunifTanjim/nui.nvim",
-		"nvim-lua/plenary.nvim",
-		"folke/trouble.nvim", -- optional
-		"nvim-telescope/telescope.nvim"
-	  }
-	},
+-- 	{
+-- 	  "jackMort/ChatGPT.nvim",
+-- 	  event = "VeryLazy",
+-- 	  config = function()
+-- 		require("chatgpt").setup({
+-- 		  -- Assumes you have OPENAI_API_KEY set in your environment
+-- 		  api_key_cmd = nil, -- use env var
+-- yank_register = "+",
+-- 		  edit_with_instructions = {
+-- 			diff = true,
+-- 			keymaps = {
+-- 			  use_output = "<C-y>",
+-- 			  use_output_replace = "<C-r>",
+-- 			  toggle_diff = "<C-d>",
+-- 			  toggle_settings = "<C-o>",
+-- 			  cycle_windows = "<Tab>",
+-- 			  select_session = "<Space>",
+-- 			  toggle_help = "<F1>",
+-- 			},
+-- 		  },
+-- 		  chat = {
+-- 			welcome_message = WELCOME_MESSAGE,
+-- 			loading_text = "Loading, please wait ...",
+-- 			question_sign = "", -- 🙂
+-- 			answer_sign = "ﮧ", -- 🤖
+-- 			max_line_length = 120,
+-- 			sessions_window = {
+-- 			  border = {
+-- 				style = "rounded",
+-- 				text = {
+-- 				  top = " Sessions ",
+-- 				},
+-- 			  },
+-- 			  win_options = {
+-- 				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+-- 			  },
+-- 			},
+-- 			-- POPUP LOCATION: right side
+-- 			window = {
+-- 			  layout = {
+-- 				position = "right", -- <--- THIS SETS THE POPUP TO THE RIGHT
+-- 				width = 0.4,        -- 40% of the screen width
+-- 				height = 0.95,
+-- 			  },
+-- 			  border = {
+-- 				style = "rounded",
+-- 				text = {
+-- 				  top = " ChatGPT ",
+-- 				},
+-- 			  },
+-- 			  win_options = {
+-- 				winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+-- 			  },
+-- 			},
+-- 		  },
+-- 		  popup_input = {
+-- 			prompt = "  ",
+-- 			border = {
+-- 			  highlight = "FloatBorder",
+-- 			  style = "rounded",
+-- 			  text = {
+-- 				top_align = "center",
+-- 				top = " Prompt ",
+-- 			  },
+-- 			},
+-- 			win_options = {
+-- 			  winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+-- 			},
+-- 			submit = "<C-Enter>",
+-- 			submit_n = "<Enter>",
+-- 		  },
+-- 		  openai_params = {
+-- 			model = "gpt-4-1106-preview", -- or your preferred model
+-- 			frequency_penalty = 0,
+-- 			presence_penalty = 0,
+-- 			max_tokens = 4095,
+-- 			temperature = 0.2,
+-- 			top_p = 0.1,
+-- 			n = 1,
+-- 		  },
+-- 		  openai_edit_params = {
+-- 			model = "gpt-3.5-turbo",
+-- 			temperature = 0,
+-- 			top_p = 1,
+-- 			n = 1,
+-- 		  },
+-- 		  actions_paths = {}, -- can add custom actions here
+-- 		  show_quickfixes_cmd = "Trouble quickfix",
+-- 		  predefined_chat_gpt_prompts = "https://raw.githubusercontent.com/f/awesome-chatgpt-prompts/main/prompts.csv",
+-- 		})
+--
+-- 		-- Keymaps for all features
+-- 		vim.keymap.set("n", "<leader>cGt", ":ChatGPT<CR>", { desc = "Open ChatGPT" })
+-- 		vim.keymap.set("n", "<leader>cGe", ":ChatGPTEditWithInstructions<CR>", { desc = "Edit with ChatGPT" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGg", ":ChatGPTRun grammar_correction<CR>", { desc = "Grammar Correction" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGt", ":ChatGPTRun translate<CR>", { desc = "Translate" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGk", ":ChatGPTRun keywords<CR>", { desc = "Keywords" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGd", ":ChatGPTRun docstring<CR>", { desc = "Docstring" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGa", ":ChatGPTRun add_tests<CR>", { desc = "Add Tests" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGo", ":ChatGPTRun optimize_code<CR>", { desc = "Optimize Code" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGs", ":ChatGPTRun summarize<CR>", { desc = "Summarize" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGf", ":ChatGPTRun fix_bugs<CR>", { desc = "Fix Bugs" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGx", ":ChatGPTRun explain_code<CR>", { desc = "Explain Code" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGr", ":ChatGPTRun roxygen_edit<CR>", { desc = "Roxygen Edit" })
+-- 		vim.keymap.set({ "n", "v" }, "<leader>cGl", ":ChatGPTRun code_readability_analysis<CR>", { desc = "Code Readability Analysis" })
+-- 	  end,
+-- 	  dependencies = {
+-- 		"MunifTanjim/nui.nvim",
+-- 		"nvim-lua/plenary.nvim",
+-- 		"folke/trouble.nvim", -- optional
+-- 		"nvim-telescope/telescope.nvim"
+-- 	  }
+-- 	},
 		-- File explorer
 	{
 		"nvim-neo-tree/neo-tree.nvim",
