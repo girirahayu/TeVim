@@ -156,58 +156,60 @@ local plugins = {
 			}
 		},
 		config = function(_, opts)
-			local chat = require("CopilotChat")
-			local select = require("CopilotChat.select")
-			local actions = require("CopilotChat.actions")
+            local chat = require("CopilotChat")
+            local select = require("CopilotChat.select")
+            -- local actions = require("CopilotChat.actions") -- REMOVED THE FAILING LINE
+            local prompts = require("CopilotChat.prompts") -- NEW: require the prompts module
 
-			chat.setup(opts)
+            chat.setup(opts)
 
-			vim.api.nvim_create_user_command("CopilotChatVisual", function(args)
-				chat.ask(args.args, { selection = select.visual })
-			end, { nargs = "*", range = true })
+            vim.api.nvim_create_user_command("CopilotChatVisual", function(args)
+                chat.ask(args.args, { selection = select.visual })
+            end, { nargs = "*", range = true })
 
-			vim.api.nvim_create_user_command("CopilotChatInline", function(args)
-				chat.ask(args.args, {
-					selection = select.visual,
-					window = {
-						layout = "float",
-						relative = "cursor",
-						width = 1,
-						height = 0.4,
-						row = 1,
-					},
-				})
-			end, { nargs = "*", range = true })
+            vim.api.nvim_create_user_command("CopilotChatInline", function(args)
+                chat.ask(args.args, {
+                    selection = select.visual,
+                    window = {
+                        layout = "float",
+                        relative = "cursor",
+                        width = 1,
+                        height = 0.4,
+                        row = 1,
+                    },
+                })
+            end, { nargs = "*", range = true })
 
-			vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
-				chat.ask(args.args, { selection = select.buffer })
-			end, { nargs = "*", range = true })
+            vim.api.nvim_create_user_command("CopilotChatBuffer", function(args)
+                chat.ask(args.args, { selection = select.buffer })
+            end, { nargs = "*", range = true })
 
-			local keymap = vim.keymap.set
-			keymap("n", "<leader>cc", "<cmd>CopilotChatToggle<cr>", { desc = "Toggle Copilot Chat" })
-			keymap("n", "<leader>ce", "<cmd>CopilotChatExplain<cr>", { desc = "Explain code" })
-			keymap("n", "<leader>ct", "<cmd>CopilotChatTests<cr>", { desc = "Generate tests" })
-			keymap("n", "<leader>cr", "<cmd>CopilotChatReview<cr>", { desc = "Review code" })
-			keymap("n", "<leader>cR", "<cmd>CopilotChatRefactor<cr>", { desc = "Refactor code" })
-			keymap("n", "<leader>cf", "<cmd>CopilotChatFix<cr>", { desc = "Fix code" })
-			keymap("n", "<leader>cg", "<cmd>CopilotChatReset<cr>", { desc = "Reset chat" })
-			keymap("n", "<leader>cm", "<cmd>CopilotChatModels<cr>", { desc = "Chat Model" })
-			keymap("n", "<leader>cq", function()
-				local input = vim.fn.input("Quick Chat: ")
-				if input ~= "" then
-					vim.cmd("CopilotChat " .. input)
-				end
-			end, { desc = "Quick chat" })
-			keymap("x", "<leader>cv", ":CopilotChatVisual<cr>", { desc = "Visual chat" })
-			keymap("x", "<leader>cx", ":CopilotChatInline<cr>", { desc = "Inline chat" })
-			keymap("n", "<leader>cp", function()
-				require("CopilotChat.integrations.telescope").pick(actions.prompt_actions())
-			end, { desc = "Prompt actions" })
-			keymap("n", "<leader>cHs", ":CopilotChatSave<Space>", { desc = "Save Copilot Chat history" })
-			keymap("n", "<leader>cHl", ":CopilotChatLoad<Space>", { desc = "Load Copilot Chat history" })
-		end,
-		event = "VeryLazy",
-	},
+            local keymap = vim.keymap.set
+            keymap("n", "<leader>cc", "<cmd>CopilotChatToggle<cr>", { desc = "Toggle Copilot Chat" })
+            keymap("n", "<leader>ce", "<cmd>CopilotChatExplain<cr>", { desc = "Explain code" })
+            keymap("n", "<leader>ct", "<cmd>CopilotChatTests<cr>", { desc = "Generate tests" })
+            keymap("n", "<leader>cr", "<cmd>CopilotChatReview<cr>", { desc = "Review code" })
+            keymap("n", "<leader>cR", "<cmd>CopilotChatRefactor<cr>", { desc = "Refactor code" })
+            keymap("n", "<leader>cf", "<cmd>CopilotChatFix<cr>", { desc = "Fix code" })
+            keymap("n", "<leader>cg", "<cmd>CopilotChatReset<cr>", { desc = "Reset chat" })
+            keymap("n", "<leader>cm", "<cmd>CopilotChatModels<cr>", { desc = "Chat Model" })
+            keymap("n", "<leader>cq", function()
+                local input = vim.fn.input("Quick Chat: ")
+                if input ~= "" then
+                    vim.cmd("CopilotChat " .. input)
+                end
+            end, { desc = "Quick chat" })
+            keymap("x", "<leader>cv", ":CopilotChatVisual<cr>", { desc = "Visual chat" })
+            keymap("x", "<leader>cx", ":CopilotChatInline<cr>", { desc = "Inline chat" })
+            keymap("n", "<leader>cp", function()
+                -- CORRECTED: Use prompts.prompt_actions() instead of actions.prompt_actions()
+                require("CopilotChat.integrations.telescope").pick(prompts.prompt_actions())
+            end, { desc = "Prompt actions" })
+            keymap("n", "<leader>cHs", ":CopilotChatSave<Space>", { desc = "Save Copilot Chat history" })
+            keymap("n", "<leader>cHl", ":CopilotChatLoad<Space>", { desc = "Load Copilot Chat history" })
+        end,
+        event = "VeryLazy",
+    },
 -- 	{
 -- 	  "jackMort/ChatGPT.nvim",
 -- 	  event = "VeryLazy",
@@ -650,9 +652,7 @@ local plugins = {
 	{
 		"ggandor/leap.nvim",
 		event = "VeryLazy",
-		config = function()
-			require("leap").add_default_mappings()
-		end,
+		config = true, -- Or you can remove this line entirely
 	},
 }
 
